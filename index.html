@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            background-color: lightblue;
+        }
+        p {
+            margin-bottom: 10px;
+        }
+        .tabs {
+            width: 100%;   
+        }
+        .tabs>ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            display: flex;
+        }
+        .tabs>ul>li {
+            flex: 1;
+        }
+        .tabs>ul>li.active>a {
+            background-color: midnightblue;
+            color: white;
+        }
+        .tabs>ul>li>a {
+            margin: 0;
+            padding: 16px 20px;
+            display: block;
+            background-color: white;
+            text-transform: uppercase;
+            text-decoration: none;
+            color: #333;
+        }
+        .tab-content {
+            flex: auto;
+            padding: 30px;
+        }
+    </style>
+</head>
+<body ng-app="app" ng-controller="Ctrl1 as ctrl1">
+    <tabs>
+        <pane title="tab-1">
+            <p>This is the content of tab-1</p>
+        </pane>
+        <pane title="tab-2">
+            <p>This is the content of tab-2</p>
+        </pane>
+    </tabs>
+</body>
+<script>
+    angular.module('app',[])
+    .controller('Ctrl1', function(){
+        var vm = this;
+    })
+    .component('tabs', {
+        transclude: true,
+        controller: function() {
+            var panes = this.panes = [];
+            this.selectPane = function(pane) {
+                angular.forEach(panes, function(pane) {
+                    pane.selected = false
+                });
+                pane.selected = true;
+            };
+            this.addPane = function(pane) {
+                if(panes.length === 0) {
+                    this.selectPane(pane);
+                }
+                panes.push(pane);
+            };
+        },
+        template: "<div class='tabs'><ul class='tab-links'><li ng-repeat='pane in $ctrl.panes' ng-class='{active: pane.selected}'><a href='#' ng-click='$ctrl.selectPane(pane)'>{{pane.title}}</a></li></ul><div class='tab-content' ng-transclude></div></div>"
+    })
+    .component('pane', {
+        transclude: true,
+        require: {
+            tabsCtrl: '^tabs'
+        },
+        bindings: {
+            title: '@'
+        },
+        controller: function() {
+            this.$onInit = function() {
+                this.tabsCtrl.addPane(this);
+                console.log(this);
+            };
+        },
+        template: "<div class='pane' ng-show='$ctrl.selected' ng-transclude></div>"
+    })
+</script>
+</html>
